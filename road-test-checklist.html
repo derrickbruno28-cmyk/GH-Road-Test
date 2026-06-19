@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Road Test Check-List | GH Logistics</title>
+<style>
+  :root{
+    --ink:#1a1c1f;--paper:#ffffff;--line:#d4d7db;--line-strong:#9aa0a6;
+    --brand:#b71c1c;--brand-dark:#7f1414;--muted:#6b7177;--fill:#f6f7f8;
+    --good:#1b7a3d;--bad:#b71c1c;--accent:#fdf0f0;--tg:#229ED9;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);background:#e9ebee;line-height:1.4;-webkit-font-smoothing:antialiased;}
+  .sheet{max-width:920px;margin:24px auto;background:var(--paper);border:1px solid var(--line);box-shadow:0 4px 24px rgba(0,0,0,.12);}
+  .masthead{background:var(--ink);color:#fff;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:4px solid var(--brand);}
+  .brand-block{display:flex;align-items:center;gap:14px;}
+  .logo-mark{width:46px;height:46px;border-radius:8px;background:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;letter-spacing:.5px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.15);}
+  .brand-text h1{font-size:13px;letter-spacing:3px;margin:0;font-weight:700;text-transform:uppercase;}
+  .brand-text p{margin:2px 0 0;font-size:11px;color:#b7bcc2;letter-spacing:1px;}
+  .doc-title{text-align:right;}
+  .doc-title .t{font-size:20px;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
+  .doc-title .s{font-size:10px;color:#b7bcc2;letter-spacing:2px;margin-top:2px;}
+  .body{padding:26px 28px 34px;}
+  .id-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;margin-bottom:18px;}
+  .field{display:flex;align-items:center;gap:8px;}
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;white-space:nowrap;min-width:62px;}
+  .field input{flex:1;border:none;border-bottom:1.5px solid var(--line-strong);font-size:14px;padding:5px 2px;background:transparent;color:var(--ink);font-family:inherit;}
+  .field input:focus{outline:none;border-bottom-color:var(--brand);}
+  .remarks{grid-column:1 / -1;align-items:flex-start;}
+  .remarks textarea{flex:1;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:13px;padding:8px;resize:vertical;min-height:42px;color:var(--ink);background:var(--fill);}
+  .remarks textarea:focus{outline:none;border-color:var(--brand);}
+  .score-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;background:var(--fill);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:24px;}
+  .score-cell{text-align:center;}
+  .score-cell .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;min-height:24px;display:flex;align-items:center;justify-content:center;}
+  .score-cell .inwrap{display:flex;align-items:center;justify-content:center;gap:2px;margin-top:5px;}
+  .score-cell input{width:42px;text-align:center;font-size:16px;font-weight:700;border:1.5px solid var(--line-strong);border-radius:6px;padding:5px 2px;font-family:inherit;color:var(--brand-dark);background:#fff;}
+  .score-cell input:focus{outline:none;border-color:var(--brand);}
+  .score-cell .denom{font-size:13px;color:var(--muted);font-weight:700;}
+  .section-head{display:flex;align-items:center;gap:10px;margin:26px 0 12px;}
+  .section-head h2{font-size:13px;letter-spacing:1.5px;text-transform:uppercase;margin:0;font-weight:800;color:var(--ink);white-space:nowrap;}
+  .section-head .rule{flex:1;height:2px;background:var(--ink);}
+  .section-head .score-tag{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+  .section-head .score-tag input{width:38px;text-align:center;font-size:14px;font-weight:700;border:1.5px solid var(--line-strong);border-radius:5px;padding:3px 2px;font-family:inherit;color:var(--brand-dark);}
+  .section-head .score-tag input:focus{outline:none;border-color:var(--brand);}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:0 36px;}
+  @media (max-width:680px){.two-col{grid-template-columns:1fr;gap:0;}.id-grid{grid-template-columns:1fr;}.score-strip{grid-template-columns:repeat(2,1fr);}}
+  .check{display:flex;align-items:flex-start;gap:10px;padding:7px 6px;border-radius:6px;cursor:pointer;border-bottom:1px solid #eef0f2;transition:background .12s;}
+  .check:hover{background:var(--accent);}
+  .check input[type=checkbox]{appearance:none;-webkit-appearance:none;width:20px;height:20px;min-width:20px;margin-top:1px;border:2px solid var(--line-strong);border-radius:5px;cursor:pointer;position:relative;background:#fff;transition:all .12s;}
+  .check input[type=checkbox]:checked{background:var(--brand);border-color:var(--brand);}
+  .check input[type=checkbox]:checked::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg);}
+  .check span{font-size:13.5px;line-height:1.35;padding-top:1px;}
+  .check input:checked ~ span{color:var(--muted);}
+  .subhead{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;font-weight:800;color:var(--brand-dark);margin:18px 0 6px;font-style:italic;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin:4px 6px 10px;}
+  .chip{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);border-radius:20px;padding:5px 12px 5px 8px;cursor:pointer;font-size:12px;font-weight:600;background:#fff;transition:all .12s;}
+  .chip:hover{border-color:var(--brand);}
+  .chip input{appearance:none;-webkit-appearance:none;width:15px;height:15px;min-width:15px;border:2px solid var(--line-strong);border-radius:4px;cursor:pointer;position:relative;}
+  .chip input:checked{background:var(--brand);border-color:var(--brand);}
+  .chip input:checked::after{content:"";position:absolute;left:3.5px;top:.5px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);}
+  .chip.on{background:var(--accent);border-color:var(--brand);}
+  .result-bar{margin-top:30px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:stretch;}
+  @media (max-width:680px){.result-bar{grid-template-columns:1fr;}}
+  .result-box{border:1.5px solid var(--line);border-radius:10px;padding:16px;text-align:center;background:var(--fill);}
+  .result-box .cap{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:800;margin-bottom:8px;}
+  .total-num{font-size:34px;font-weight:800;color:var(--brand-dark);line-height:1;}
+  .total-num small{font-size:16px;color:var(--muted);}
+  .total-sub{font-size:10px;color:var(--muted);margin-top:6px;}
+  .pf-buttons{display:flex;gap:8px;justify-content:center;}
+  .pf{flex:1;border:2px solid var(--line-strong);border-radius:8px;background:#fff;padding:12px 6px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;color:var(--muted);transition:all .12s;font-family:inherit;}
+  .pf.pass.active{background:var(--good);border-color:var(--good);color:#fff;}
+  .pf.fail.active{background:var(--bad);border-color:var(--bad);color:#fff;}
+  .goal-field{display:flex;flex-direction:column;justify-content:center;}
+  .goal-field input{width:100%;border:1.5px solid var(--line-strong);border-radius:6px;padding:8px;font-size:14px;font-family:inherit;text-align:center;color:var(--ink);}
+  .goal-field input:focus{outline:none;border-color:var(--brand);}
+  .sigs{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-top:34px;}
+  @media (max-width:680px){.sigs{grid-template-columns:1fr;gap:24px;}}
+  .sig{display:flex;flex-direction:column;}
+  .sig input{border:none;border-bottom:1.5px solid var(--ink);padding:6px 2px;font-size:14px;font-family:inherit;background:transparent;}
+  .sig input:focus{outline:none;border-bottom-color:var(--brand);}
+  .sig label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;color:var(--muted);margin-top:5px;}
+  .toolbar{max-width:920px;margin:0 auto 8px;display:flex;gap:10px;justify-content:flex-end;align-items:center;padding:0 4px;flex-wrap:wrap;}
+  .btn{border:none;border-radius:8px;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.5px;transition:transform .08s,filter .12s;}
+  .btn:active{transform:translateY(1px);}
+  .btn:disabled{opacity:.55;cursor:not-allowed;}
+  .btn-send{background:var(--tg);color:#fff;}
+  .btn-send:hover{filter:brightness(1.07);}
+  .btn-pdf{background:var(--brand);color:#fff;}
+  .btn-pdf:hover{filter:brightness(1.08);}
+  .btn-clear{background:#fff;color:var(--ink);border:1.5px solid var(--line-strong);}
+  .btn-clear:hover{border-color:var(--brand);color:var(--brand);}
+  .send-status{max-width:920px;margin:0 auto 30px;padding:0 6px;text-align:right;font-size:13px;font-weight:700;min-height:18px;}
+  .send-status.ok{color:var(--good);}
+  .send-status.err{color:var(--bad);}
+  .send-status.work{color:var(--muted);}
+  .footnote{max-width:920px;margin:0 auto 50px;padding:0 6px;font-size:11px;color:#8a9097;text-align:center;}
+  @media print{
+    body{background:#fff;}
+    .toolbar,.footnote,.send-status{display:none !important;}
+    .sheet{box-shadow:none;border:none;margin:0;max-width:100%;}
+    .check:hover{background:none;}
+    .masthead{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .logo-mark,.section-head .rule,.check input:checked,.chip input:checked,.pf.active,.total-num{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    @page{margin:14mm;}
+    .check{padding:4px 4px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="masthead">
+    <div class="brand-block">
+      <div class="logo-mark">GH</div>
+      <div class="brand-text"><h1>GH Logistics</h1><p>AJG Transport &middot; Driver Qualification</p></div>
+    </div>
+    <div class="doc-title"><div class="t">Road Test</div><div class="s">Check-List</div></div>
+  </div>
+
+  <div class="body">
+    <div class="id-grid">
+      <div class="field"><label>Name</label><input type="text" id="f_name"></div>
+      <div class="field"><label>Date</label><input type="text" id="f_date"></div>
+      <div class="field"><label>Position</label><input type="text" id="f_position"></div>
+      <div class="field"><label>Time</label><input type="text" id="f_time"></div>
+      <div class="field"><label>Email</label><input type="text" id="f_email"></div>
+      <div class="field"><label>Phone</label><input type="text" id="f_phone"></div>
+      <div class="field"><label>RTG</label><input type="text" id="f_rtg"></div>
+      <div class="field"><label>Examiner</label><input type="text" id="f_examiner"></div>
+      <div class="field remarks"><label>Remarks</label><textarea id="f_remarks"></textarea></div>
+    </div>
+
+    <div class="score-strip">
+      <div class="score-cell"><div class="lbl">Pre-Trip Inspection</div><div class="inwrap"><input type="number" min="0" max="10" class="score" data-label="Pre-Trip"><span class="denom">/10</span></div></div>
+      <div class="score-cell"><div class="lbl">DOT Regulations</div><div class="inwrap"><input type="number" min="0" max="10" class="score" data-label="DOT"><span class="denom">/10</span></div></div>
+      <div class="score-cell"><div class="lbl">Safety Oriented</div><div class="inwrap"><input type="number" min="0" max="10" class="score" data-label="Safety"><span class="denom">/10</span></div></div>
+      <div class="score-cell"><div class="lbl">Coupling</div><div class="inwrap"><input type="number" min="0" max="10" class="score" data-label="Coupling"><span class="denom">/10</span></div></div>
+      <div class="score-cell"><div class="lbl">Uncoupling</div><div class="inwrap"><input type="number" min="0" max="10" class="score" data-label="Uncoupling"><span class="denom">/10</span></div></div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <label class="check"><input type="checkbox"><span>Investigate &amp; report any equipment faults</span></label>
+        <label class="check"><input type="checkbox"><span>Precautions during inclement weather</span></label>
+        <label class="check"><input type="checkbox"><span>Straps, fire-extinguisher, triangles, logbook, fuses</span></label>
+        <label class="check"><input type="checkbox"><span>Driver can NOT take truck home</span></label>
+        <label class="check"><input type="checkbox"><span>Trailer door (LASH)</span></label>
+        <label class="check"><input type="checkbox"><span>How to take pictures of truck and trailer</span></label>
+        <label class="check"><input type="checkbox"><span>What to do in case of an accident</span></label>
+        <label class="check"><input type="checkbox"><span>Basic Troubleshooting</span></label>
+        <label class="check"><input type="checkbox"><span>Left lane policy</span></label>
+        <label class="check"><input type="checkbox"><span>Knows gauges and their functions</span></label>
+        <label class="check"><input type="checkbox"><span>Proper tire pressure PSI</span></label>
+      </div>
+      <div>
+        <label class="check"><input type="checkbox"><span>Does own headset</span></label>
+        <label class="check"><input type="checkbox"><span>Check trailer for holes</span></label>
+        <label class="check"><input type="checkbox"><span>Binder paperwork required</span></label>
+        <label class="check"><input type="checkbox"><span>When malfunction &mdash; STOP</span></label>
+        <label class="check"><input type="checkbox"><span>Trailer tire inflation system</span></label>
+        <label class="check"><input type="checkbox"><span>How and when to slide tandems</span></label>
+        <label class="check"><input type="checkbox"><span>How to report mechanical issues</span></label>
+        <label class="check"><input type="checkbox"><span>Minimum brake pad thickness</span></label>
+        <label class="check"><input type="checkbox"><span>Speed limits &mdash; No Speeding</span></label>
+        <label class="check"><input type="checkbox"><span>Air brake test</span></label>
+        <label class="check"><input type="checkbox"><span>Weigh station Rules</span></label>
+      </div>
+    </div>
+
+    <div class="subhead">Check Suspension &amp; Undercarriage</div>
+    <div class="chip-row">
+      <label class="chip"><input type="checkbox">Brake Chambers</label>
+      <label class="chip"><input type="checkbox">Slack Adjusters</label>
+      <label class="chip"><input type="checkbox">Leaf Springs</label>
+      <label class="chip"><input type="checkbox">Shock Absorbers</label>
+      <label class="chip"><input type="checkbox">Loose Bolts</label>
+      <label class="chip"><input type="checkbox">Drive Shaft</label>
+      <label class="chip"><input type="checkbox">U Joints</label>
+      <label class="chip"><input type="checkbox">Differential Leaks</label>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-head"><h2>In&ndash;Cab</h2><span class="rule"></span></div>
+        <label class="check"><input type="checkbox"><span>Adjusted mirrors and seat</span></label>
+        <label class="check"><input type="checkbox"><span>Fastened seatbelt</span></label>
+        <label class="check"><input type="checkbox"><span>Know where vehicle controls are located</span></label>
+        <div class="section-head"><h2>Yard Policies</h2><span class="rule"></span></div>
+        <label class="check"><input type="checkbox"><span>Pending Delivery Paperwork goes in Shed</span></label>
+        <label class="check"><input type="checkbox"><span>Completed Delivery Paperwork in Mailbox</span></label>
+        <label class="check"><input type="checkbox"><span>Keeping assigned unit clean at all times</span></label>
+        <div class="section-head" style="margin-top:20px;"><h2 style="font-style:italic;">Backing</h2><span class="rule"></span><span class="score-tag"><input type="number" min="0" max="10" class="score" data-label="Backing">/10</span></div>
+        <div class="section-head" style="margin-top:6px;"><h2 style="font-style:italic;">Defensive Driving</h2><span class="rule"></span><span class="score-tag"><input type="number" min="0" max="10" class="score" data-label="Defensive Driving">/10</span></div>
+        <div class="section-head" style="margin-top:6px;"><h2 style="font-style:italic;">Operation of Equip.</h2><span class="rule"></span><span class="score-tag"><input type="number" min="0" max="10" class="score" data-label="Operation of Equip.">/10</span></div>
+      </div>
+      <div>
+        <div class="section-head"><h2 style="font-style:italic;">While Driving</h2><span class="rule"></span></div>
+        <label class="check"><input type="checkbox"><span>Keeps both hands on the steering wheel</span></label>
+        <label class="check"><input type="checkbox"><span>Use of turn signals when appropriate</span></label>
+        <label class="check"><input type="checkbox"><span>Looks for and obeys all traffic lights and signals</span></label>
+        <label class="check"><input type="checkbox"><span>Follows at a safe distance (adjusts to weather)</span></label>
+        <label class="check"><input type="checkbox"><span>Driving at or below speed limit</span></label>
+        <label class="check"><input type="checkbox"><span>Sees and reacts appropriately to hazards</span></label>
+        <label class="check"><input type="checkbox"><span>Stops completely behind crosswalk / limit line</span></label>
+        <label class="check"><input type="checkbox"><span>Checks mirrors at regular intervals</span></label>
+        <label class="check"><input type="checkbox"><span>Checking traffic often</span></label>
+        <label class="check"><input type="checkbox"><span>Checking blind spot</span></label>
+        <label class="check"><input type="checkbox"><span>Yields and accepts right-of-way as appropriate</span></label>
+        <label class="check"><input type="checkbox"><span>Using right lane as much as possible</span></label>
+        <label class="check"><input type="checkbox"><span>Signals 100 feet before starting maneuver</span></label>
+        <label class="check"><input type="checkbox"><span>Using space available while turning</span></label>
+        <label class="check"><input type="checkbox"><span>Correct speed while turning</span></label>
+        <label class="check"><input type="checkbox"><span>Begins and ends maneuver in correct lane</span></label>
+      </div>
+    </div>
+
+    <div class="result-bar">
+      <div class="result-box">
+        <div class="cap">Total Score</div>
+        <div class="total-num"><span id="totalVal">0.0</span><small>/10</small></div>
+        <div class="total-sub" id="totalSub">Average of 8 scored sections</div>
+      </div>
+      <div class="result-box goal-field"><div class="cap">Goal</div><input type="text" id="f_goal" placeholder="Enter goal"></div>
+      <div class="result-box">
+        <div class="cap">Passed</div>
+        <div class="pf-buttons">
+          <button type="button" class="pf pass" onclick="setPF(this,'pass')">Pass</button>
+          <button type="button" class="pf fail" onclick="setPF(this,'fail')">Fail</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sigs">
+      <div class="sig"><input type="text" id="f_driversig"><label>Driver Signature</label></div>
+      <div class="sig"><input type="text" id="f_examinersig"><label>Examiner Signature</label></div>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="btn btn-clear" onclick="clearForm()">Clear</button>
+  <button class="btn btn-pdf" onclick="window.print()">Print / Save PDF</button>
+  <button class="btn btn-send" id="sendBtn" onclick="sendToTelegram()">Send to Telegram</button>
+</div>
+<div class="send-status" id="sendStatus"></div>
+
+<div class="footnote">
+  GH Logistics &middot; AJG Transport &nbsp;|&nbsp; Road Test Check-List
+</div>
+
+<script>
+  /* =========================================================
+     ===============  TELEGRAM CONFIG  =======================
+     Paste your two values between the quotes, then save.
+     Get these from BotFather (token) and your group (chat id).
+     ========================================================= */
+  const TELEGRAM = {
+    BOT_TOKEN: "PASTE_YOUR_BOT_TOKEN_HERE",
+    CHAT_ID:   "PASTE_YOUR_GROUP_CHAT_ID_HERE"   // e.g. -1001234567890 (keep the minus sign)
+  };
+  /* ========================================================= */
+
+  function recalc(){
+    const scores=[...document.querySelectorAll('.score')];
+    let sum=0,count=0;
+    scores.forEach(s=>{const v=parseFloat(s.value);if(!isNaN(v)){sum+=Math.min(Math.max(v,0),10);count++;}});
+    const avg=count?(sum/count):0;
+    document.getElementById('totalVal').textContent=avg.toFixed(1);
+    document.getElementById('totalSub').textContent=count?('Average of '+count+' completed section'+(count>1?'s':'')):'Average of 8 scored sections';
+    return {avg:avg.toFixed(1),count};
+  }
+  document.querySelectorAll('.score').forEach(s=>s.addEventListener('input',recalc));
+
+  function setPF(btn){
+    const group=btn.parentElement.querySelectorAll('.pf');
+    const wasActive=btn.classList.contains('active');
+    group.forEach(b=>b.classList.remove('active'));
+    if(!wasActive) btn.classList.add('active');
+  }
+
+  document.querySelectorAll('.chip input').forEach(cb=>{
+    cb.addEventListener('change',()=>cb.closest('.chip').classList.toggle('on',cb.checked));
+  });
+
+  function clearForm(){
+    if(!confirm('Clear all entries on this form?'))return;
+    document.querySelectorAll('input[type=text], input[type=number], textarea').forEach(el=>el.value='');
+    document.querySelectorAll('input[type=checkbox]').forEach(el=>el.checked=false);
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+    document.querySelectorAll('.pf').forEach(b=>b.classList.remove('active'));
+    document.getElementById('sendStatus').textContent='';
+    recalc();
+  }
+
+  function val(id){return (document.getElementById(id).value||'').trim();}
+
+  function buildReport(){
+    const r=recalc();
+    let pf='Not marked';
+    if(document.querySelector('.pf.pass.active')) pf='PASS';
+    else if(document.querySelector('.pf.fail.active')) pf='FAIL';
+
+    // section scores
+    const scoreLines=[...document.querySelectorAll('.score')]
+      .map(s=>({label:s.dataset.label, v:s.value.trim()}))
+      .filter(s=>s.v!=='')
+      .map(s=>s.label+': '+s.v);
+
+    // missed items (unchecked checklist rows + unchecked chips)
+    const missed=[];
+    document.querySelectorAll('.check').forEach(lbl=>{
+      const cb=lbl.querySelector('input[type=checkbox]');
+      if(cb && !cb.checked){missed.push(lbl.querySelector('span').textContent.trim());}
+    });
+    document.querySelectorAll('.chip').forEach(c=>{
+      const cb=c.querySelector('input[type=checkbox]');
+      if(cb && !cb.checked){missed.push(c.textContent.trim());}
+    });
+
+    const flag = pf==='PASS' ? '\u2705' : (pf==='FAIL' ? '\u274C' : '\u2796');
+
+    let t='';
+    t+='\uD83D\uDE9B ROAD TEST \u2014 GH Logistics / AJG\n';
+    t+='\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
+    t+='Result: '+flag+' '+pf+'\n';
+    t+='Total Score: '+r.avg+'/10\n\n';
+    t+='Driver: '+(val('f_name')||'\u2014')+'\n';
+    if(val('f_position')) t+='Position: '+val('f_position')+'\n';
+    t+='Date: '+(val('f_date')||'\u2014')+'   Time: '+(val('f_time')||'\u2014')+'\n';
+    t+='Examiner: '+(val('f_examiner')||'\u2014')+'\n';
+    if(val('f_phone')) t+='Phone: '+val('f_phone')+'\n';
+    if(val('f_email')) t+='Email: '+val('f_email')+'\n';
+    if(val('f_rtg'))   t+='RTG: '+val('f_rtg')+'\n';
+
+    if(scoreLines.length){t+='\n\uD83D\uDCCA Section Scores\n'+scoreLines.join('  |  ')+'\n';}
+    if(val('f_goal')) t+='\nGoal: '+val('f_goal')+'\n';
+
+    if(missed.length){
+      t+='\n\u26A0\uFE0F Missed / Not Demonstrated ('+missed.length+')\n';
+      t+= missed.map(m=>'\u2022 '+m).join('\n')+'\n';
+    } else {
+      t+='\n\u2705 All checklist items demonstrated.\n';
+    }
+
+    if(val('f_remarks')) t+='\n\uD83D\uDCDD Remarks: '+val('f_remarks')+'\n';
+    if(val('f_driversig')||val('f_examinersig')){
+      t+='\nSignatures \u2014 Driver: '+(val('f_driversig')||'\u2014')+' | Examiner: '+(val('f_examinersig')||'\u2014');
+    }
+    return t;
+  }
+
+  async function sendToTelegram(){
+    const status=document.getElementById('sendStatus');
+    const btn=document.getElementById('sendBtn');
+
+    if(TELEGRAM.BOT_TOKEN.indexOf('PASTE_')===0 || TELEGRAM.CHAT_ID.indexOf('PASTE_')===0){
+      status.className='send-status err';
+      status.textContent='\u26A0 Setup needed: add your bot token and chat ID in the file before sending.';
+      return;
+    }
+    if(!val('f_name')){
+      if(!confirm('No driver name entered. Send anyway?')) return;
+    }
+
+    const text=buildReport();
+    btn.disabled=true;
+    status.className='send-status work';
+    status.textContent='Sending to Telegram\u2026';
+
+    try{
+      const url='https://api.telegram.org/bot'+TELEGRAM.BOT_TOKEN+'/sendMessage';
+      const res=await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({chat_id:TELEGRAM.CHAT_ID, text:text, disable_web_page_preview:true})
+      });
+      const data=await res.json();
+      if(data.ok){
+        status.className='send-status ok';
+        status.textContent='\u2705 Sent to the Telegram group.';
+      }else{
+        status.className='send-status err';
+        status.textContent='\u274C Telegram error: '+(data.description||'unknown');
+      }
+    }catch(err){
+      status.className='send-status err';
+      status.textContent='\u274C Could not send: '+err.message;
+    }finally{
+      btn.disabled=false;
+    }
+  }
+</script>
+</body>
+</html>
