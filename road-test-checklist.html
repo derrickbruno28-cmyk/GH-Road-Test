@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Road Test Check-List | GH Logistics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root{
     --ink:#1a1c1f;--paper:#ffffff;--line:#d4d7db;--line-strong:#9aa0a6;
@@ -140,7 +141,7 @@
       <div class="score-cell"><div class="lbl">Uncoupling</div><div class="inwrap"><input type="number" min="0" max="10" class="score" data-label="Uncoupling"><span class="denom">/10</span></div></div>
     </div>
 
-    <div class="two-col">
+    <div class="two-col" id="b_knowledge">
       <div>
         <label class="check"><input type="checkbox"><span>Investigate &amp; report any equipment faults</span></label>
         <label class="check"><input type="checkbox"><span>Precautions during inclement weather</span></label>
@@ -170,7 +171,7 @@
     </div>
 
     <div class="subhead">Check Suspension &amp; Undercarriage</div>
-    <div class="chip-row">
+    <div class="chip-row" id="b_under">
       <label class="chip"><input type="checkbox">Brake Chambers</label>
       <label class="chip"><input type="checkbox">Slack Adjusters</label>
       <label class="chip"><input type="checkbox">Leaf Springs</label>
@@ -182,7 +183,7 @@
     </div>
 
     <div class="two-col">
-      <div>
+      <div id="b_incab">
         <div class="section-head"><h2>In&ndash;Cab</h2><span class="rule"></span></div>
         <label class="check"><input type="checkbox"><span>Adjusted mirrors and seat</span></label>
         <label class="check"><input type="checkbox"><span>Fastened seatbelt</span></label>
@@ -195,7 +196,7 @@
         <div class="section-head" style="margin-top:6px;"><h2 style="font-style:italic;">Defensive Driving</h2><span class="rule"></span><span class="score-tag"><input type="number" min="0" max="10" class="score" data-label="Defensive Driving">/10</span></div>
         <div class="section-head" style="margin-top:6px;"><h2 style="font-style:italic;">Operation of Equip.</h2><span class="rule"></span><span class="score-tag"><input type="number" min="0" max="10" class="score" data-label="Operation of Equip.">/10</span></div>
       </div>
-      <div>
+      <div id="b_driving">
         <div class="section-head"><h2 style="font-style:italic;">While Driving</h2><span class="rule"></span></div>
         <label class="check"><input type="checkbox"><span>Keeps both hands on the steering wheel</span></label>
         <label class="check"><input type="checkbox"><span>Use of turn signals when appropriate</span></label>
@@ -242,19 +243,16 @@
 <div class="toolbar">
   <button class="btn btn-clear" onclick="clearForm()">Clear</button>
   <button class="btn btn-pdf" onclick="window.print()">Print / Save PDF</button>
-  <button class="btn btn-send" id="sendBtn" onclick="sendToTelegram()">Send to Telegram</button>
+  <button class="btn btn-send" id="sendBtn" onclick="sendToTelegram()">Send PDF to Telegram</button>
 </div>
 <div class="send-status" id="sendStatus"></div>
 
-<div class="footnote">
-  GH Logistics &middot; AJG Transport &nbsp;|&nbsp; Road Test Check-List
-</div>
+<div class="footnote">GH Logistics &middot; AJG Transport &nbsp;|&nbsp; Road Test Check-List</div>
 
 <script>
   /* =========================================================
      ===============  TELEGRAM CONFIG  =======================
      Paste your two values between the quotes, then save.
-     Get these from BotFather (token) and your group (chat id).
      ========================================================= */
   const TELEGRAM = {
     BOT_TOKEN: "8782792394:AAFQZJN9AkIAfmPxOwoRjiKMIfsZqpux7cE",
@@ -296,60 +294,166 @@
 
   function val(id){return (document.getElementById(id).value||'').trim();}
 
-  function buildReport(){
+  function gather(){
     const r=recalc();
     let pf='Not marked';
     if(document.querySelector('.pf.pass.active')) pf='PASS';
     else if(document.querySelector('.pf.fail.active')) pf='FAIL';
 
-    // section scores
-    const scoreLines=[...document.querySelectorAll('.score')]
-      .map(s=>({label:s.dataset.label, v:s.value.trim()}))
-      .filter(s=>s.v!=='')
-      .map(s=>s.label+': '+s.v);
+    const scores=[...document.querySelectorAll('.score')]
+      .map(s=>({label:s.dataset.label, v:s.value.trim()}));
 
-    // missed items (unchecked checklist rows + unchecked chips)
-    const missed=[];
-    document.querySelectorAll('.check').forEach(lbl=>{
-      const cb=lbl.querySelector('input[type=checkbox]');
-      if(cb && !cb.checked){missed.push(lbl.querySelector('span').textContent.trim());}
-    });
-    document.querySelectorAll('.chip').forEach(c=>{
-      const cb=c.querySelector('input[type=checkbox]');
-      if(cb && !cb.checked){missed.push(c.textContent.trim());}
-    });
-
-    const flag = pf==='PASS' ? '\u2705' : (pf==='FAIL' ? '\u274C' : '\u2796');
-
-    let t='';
-    t+='\uD83D\uDE9B ROAD TEST \u2014 GH Logistics / AJG\n';
-    t+='\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
-    t+='Result: '+flag+' '+pf+'\n';
-    t+='Total Score: '+r.avg+'/10\n\n';
-    t+='Driver: '+(val('f_name')||'\u2014')+'\n';
-    if(val('f_position')) t+='Position: '+val('f_position')+'\n';
-    t+='Date: '+(val('f_date')||'\u2014')+'   Time: '+(val('f_time')||'\u2014')+'\n';
-    t+='Examiner: '+(val('f_examiner')||'\u2014')+'\n';
-    if(val('f_phone')) t+='Phone: '+val('f_phone')+'\n';
-    if(val('f_email')) t+='Email: '+val('f_email')+'\n';
-    if(val('f_rtg'))   t+='RTG: '+val('f_rtg')+'\n';
-
-    if(scoreLines.length){t+='\n\uD83D\uDCCA Section Scores\n'+scoreLines.join('  |  ')+'\n';}
-    if(val('f_goal')) t+='\nGoal: '+val('f_goal')+'\n';
-
-    if(missed.length){
-      t+='\n\u26A0\uFE0F Missed / Not Demonstrated ('+missed.length+')\n';
-      t+= missed.map(m=>'\u2022 '+m).join('\n')+'\n';
-    } else {
-      t+='\n\u2705 All checklist items demonstrated.\n';
+    function block(sel, isChip){
+      return [...document.querySelectorAll(sel)].map(el=>{
+        const cb=el.querySelector('input[type=checkbox]');
+        const text=isChip ? el.textContent.trim() : el.querySelector('span').textContent.trim();
+        return {text, checked: cb ? cb.checked : false};
+      });
     }
+    const blocks=[
+      {title:'Knowledge & Compliance', items:block('#b_knowledge .check',false)},
+      {title:'Suspension & Undercarriage', items:block('#b_under .chip',true)},
+      {title:'In-Cab & Yard Policies', items:block('#b_incab .check',false)},
+      {title:'While Driving', items:block('#b_driving .check',false)}
+    ];
+    let total=0, done=0;
+    blocks.forEach(b=>b.items.forEach(i=>{total++; if(i.checked)done++;}));
 
-    if(val('f_remarks')) t+='\n\uD83D\uDCDD Remarks: '+val('f_remarks')+'\n';
-    if(val('f_driversig')||val('f_examinersig')){
-      t+='\nSignatures \u2014 Driver: '+(val('f_driversig')||'\u2014')+' | Examiner: '+(val('f_examinersig')||'\u2014');
-    }
-    return t;
+    return {
+      name:val('f_name'), position:val('f_position'), date:val('f_date'), time:val('f_time'),
+      email:val('f_email'), phone:val('f_phone'), rtg:val('f_rtg'), examiner:val('f_examiner'),
+      remarks:val('f_remarks'), goal:val('f_goal'),
+      driversig:val('f_driversig'), examinersig:val('f_examinersig'),
+      pf, avg:r.avg, scores, blocks, total, done
+    };
   }
+
+  function drawBox(doc,x,y,s,checked){
+    if(checked){
+      doc.setFillColor(183,28,28); doc.setDrawColor(183,28,28); doc.setLineWidth(0.3);
+      doc.roundedRect(x,y,s,s,0.4,0.4,'FD');
+      doc.setDrawColor(255,255,255); doc.setLineWidth(0.5);
+      doc.line(x+0.7,y+s*0.55, x+1.25,y+s*0.78);
+      doc.line(x+1.25,y+s*0.78, x+2.35,y+s*0.28);
+    }else{
+      doc.setFillColor(255,255,255); doc.setDrawColor(150,150,150); doc.setLineWidth(0.3);
+      doc.roundedRect(x,y,s,s,0.4,0.4,'D');
+    }
+  }
+
+  function buildPdfBlob(d){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p','mm','a4');
+    const W=210, H=297, M=12;
+    const ink=[26,28,31], brand=[183,28,28], muted=[107,113,119], good=[27,122,61];
+
+    // header bar
+    doc.setFillColor.apply(doc,ink); doc.rect(0,0,W,21,'F');
+    doc.setFillColor.apply(doc,brand); doc.rect(0,21,W,1.5,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.text('GH LOGISTICS', M, 10);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(195,198,205);
+    doc.text('AJG TRANSPORT  -  Driver Qualification', M, 15.5);
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(255,255,255);
+    doc.text('ROAD TEST CHECK-LIST', W-M, 13, {align:'right'});
+
+    let y=30;
+    // result banner
+    const banner = d.pf==='PASS'?good:(d.pf==='FAIL'?brand:muted);
+    doc.setFillColor.apply(doc,banner); doc.roundedRect(M,y,W-2*M,13,2,2,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(12);
+    doc.text('RESULT:  '+d.pf, M+5, y+8.5);
+    doc.text('TOTAL SCORE:  '+d.avg+' / 10', W-M-5, y+8.5, {align:'right'});
+    y+=20;
+
+    // info grid
+    function pair(label,value,x,yy){
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor.apply(doc,muted);
+      doc.text(label.toUpperCase(), x, yy);
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor.apply(doc,ink);
+      doc.text(value||'-', x, yy+4.6);
+    }
+    const colL=M, colR=W/2+4, rowH=11;
+    pair('Name', d.name, colL, y);     pair('Date', d.date, colR, y);
+    pair('Position', d.position, colL, y+rowH);  pair('Time', d.time, colR, y+rowH);
+    pair('Examiner', d.examiner, colL, y+rowH*2); pair('Phone', d.phone, colR, y+rowH*2);
+    pair('Email', d.email, colL, y+rowH*3);  pair('RTG', d.rtg, colR, y+rowH*3);
+    y+=rowH*3+10;
+
+    // section scores
+    doc.setDrawColor(220,220,222); doc.setLineWidth(0.3); doc.line(M,y-3,W-M,y-3);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor.apply(doc,brand);
+    doc.text('SECTION SCORES', M, y+1); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor.apply(doc,ink);
+    const sc = d.scores.map(s=>s.label+': '+(s.v||'-'));
+    const scLines = doc.splitTextToSize(sc.join('     '), W-2*M);
+    doc.text(scLines, M, y); y+= scLines.length*4.5 + 3;
+
+    // checklist blocks
+    const colGap=6, colW=(W-2*M-colGap)/2, xs=[M, M+colW+colGap], box=3;
+    d.blocks.forEach(blk=>{
+      const half=Math.ceil(blk.items.length/2);
+      const estH = 7 + half*4.6;
+      if(y+estH > H-22){ doc.addPage(); y=M+4; }
+      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor.apply(doc,brand);
+      doc.text(blk.title.toUpperCase(), M, y);
+      doc.setDrawColor(225,225,227); doc.setLineWidth(0.3); doc.line(M,y+1.6,W-M,y+1.6);
+      y+=5.5;
+      const cols=[blk.items.slice(0,half), blk.items.slice(half)];
+      let maxY=y;
+      for(let c=0;c<2;c++){
+        let cy=y;
+        cols[c].forEach(it=>{
+          doc.setFont('helvetica','normal'); doc.setFontSize(8);
+          const lines=doc.splitTextToSize(it.text, colW-box-3);
+          drawBox(doc, xs[c], cy-2.3, box, it.checked);
+          doc.setTextColor(it.checked?60:30, it.checked?60:30, it.checked?60:30);
+          doc.text(lines, xs[c]+box+2.2, cy);
+          cy += Math.max(4.6, lines.length*3.6+1.2);
+        });
+        if(cy>maxY) maxY=cy;
+      }
+      y=maxY+4;
+    });
+
+    // remarks / goal
+    if(d.goal || d.remarks){
+      if(y > H-30){ doc.addPage(); y=M+4; }
+      if(d.goal){
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor.apply(doc,brand); doc.text('GOAL', M, y);
+        doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor.apply(doc,ink);
+        const gl=doc.splitTextToSize(d.goal, W-2*M); doc.text(gl, M, y+4.5); y+= gl.length*4.5+7;
+      }
+      if(d.remarks){
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor.apply(doc,brand); doc.text('REMARKS', M, y);
+        doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor.apply(doc,ink);
+        const rl=doc.splitTextToSize(d.remarks, W-2*M); doc.text(rl, M, y+4.5); y+= rl.length*4.5+7;
+      }
+    }
+
+    // signatures
+    if(y > H-30){ doc.addPage(); y=M+10; } else { y+=6; }
+    doc.setDrawColor.apply(doc,ink); doc.setLineWidth(0.4);
+    doc.line(M, y, M+colW-6, y); doc.line(colR, y, colR+colW-6, y);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor.apply(doc,muted);
+    doc.text('DRIVER  '+(d.driversig||''), M, y+4.5);
+    doc.text('EXAMINER  '+(d.examinersig||''), colR, y+4.5);
+
+    return doc.output('blob');
+  }
+
+  function buildCaption(d){
+    const flag = d.pf==='PASS'?'\u2705':(d.pf==='FAIL'?'\u274C':'\u2796');
+    const missed = d.total - d.done;
+    let c='\uD83D\uDE9B Road Test \u2014 GH/AJG\n';
+    c+='Driver: '+(d.name||'\u2014')+'\n';
+    c+='Result: '+flag+' '+d.pf+'   |   Total: '+d.avg+'/10\n';
+    c+='Examiner: '+(d.examiner||'\u2014')+'   |   Date: '+(d.date||'\u2014')+'\n';
+    c+= missed>0 ? ('\u26A0\uFE0F '+missed+' item(s) not demonstrated \u2014 see PDF') : ('\u2705 All checklist items demonstrated');
+    return c;
+  }
+
+  function safeName(s){return (s||'driver').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,40)||'driver';}
 
   async function sendToTelegram(){
     const status=document.getElementById('sendStatus');
@@ -360,26 +464,33 @@
       status.textContent='\u26A0 Setup needed: add your bot token and chat ID in the file before sending.';
       return;
     }
-    if(!val('f_name')){
-      if(!confirm('No driver name entered. Send anyway?')) return;
+    if(typeof window.jspdf==='undefined'){
+      status.className='send-status err';
+      status.textContent='\u274C PDF library did not load \u2014 check your connection and reload the page.';
+      return;
     }
+    const d=gather();
+    if(!d.name){ if(!confirm('No driver name entered. Send anyway?')) return; }
 
-    const text=buildReport();
     btn.disabled=true;
     status.className='send-status work';
-    status.textContent='Sending to Telegram\u2026';
+    status.textContent='Generating PDF\u2026';
 
     try{
-      const url='https://api.telegram.org/bot'+TELEGRAM.BOT_TOKEN+'/sendMessage';
-      const res=await fetch(url,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({chat_id:TELEGRAM.CHAT_ID, text:text, disable_web_page_preview:true})
-      });
+      const blob=buildPdfBlob(d);
+      const fname='RoadTest_'+safeName(d.name)+'_'+(d.date? safeName(d.date):'') +'.pdf';
+
+      status.textContent='Sending to Telegram\u2026';
+      const fd=new FormData();
+      fd.append('chat_id', TELEGRAM.CHAT_ID);
+      fd.append('caption', buildCaption(d));
+      fd.append('document', blob, fname);
+
+      const res=await fetch('https://api.telegram.org/bot'+TELEGRAM.BOT_TOKEN+'/sendDocument',{method:'POST', body:fd});
       const data=await res.json();
       if(data.ok){
         status.className='send-status ok';
-        status.textContent='\u2705 Sent to the Telegram group.';
+        status.textContent='\u2705 PDF sent to the Telegram group.';
       }else{
         status.className='send-status err';
         status.textContent='\u274C Telegram error: '+(data.description||'unknown');
