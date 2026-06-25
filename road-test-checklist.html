@@ -256,7 +256,8 @@
      ========================================================= */
   const TELEGRAM = {
     BOT_TOKEN: "8782792394:AAFQZJN9AkIAfmPxOwoRjiKMIfsZqpux7cE",
-    CHAT_ID:   "-1002628256393"   // e.g. -1001234567890 (keep the minus sign)
+    CHAT_ID:   "-1002628256393",  // e.g. -1001234567890 (keep the minus sign)
+    THREAD_ID: "190"                                // topic ID for a sub-group/topic; leave "" for the main General topic
   };
   /* ========================================================= */
 
@@ -483,6 +484,7 @@
       status.textContent='Sending to Telegram\u2026';
       const fd=new FormData();
       fd.append('chat_id', TELEGRAM.CHAT_ID);
+      if(TELEGRAM.THREAD_ID) fd.append('message_thread_id', TELEGRAM.THREAD_ID);
       fd.append('caption', buildCaption(d));
       fd.append('document', blob, fname);
 
